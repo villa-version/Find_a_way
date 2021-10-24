@@ -1,7 +1,7 @@
 import pygame, sys
 from random import randint as rand
 
-CELL_NUMBER, CELL_SIZE = 30, 30
+CELL_NUMBER, CELL_SIZE = 20, 30
 
 
 class Cell:
@@ -71,8 +71,8 @@ class MainController:
             pass
 
     def spawn_start_point(self, mx, my):
-        x = mx//CELL_NUMBER
-        y = my//CELL_NUMBER
+        x = mx//CELL_SIZE
+        y = my//CELL_SIZE
         self.start_point = StartPoint(x, y, self.screen)
 
     def spawn_grid(self):
@@ -83,44 +83,84 @@ class MainController:
             for x in r:
                 self.grid[y].append(Cell(x, y, False, self.screen))
 
+    def way_out_of_a_trap(self):
+        counter = 0
+        if self.way[-1].y - 1 < 0:
+            counter += 1
+        else:
+            if self.grid[self.way[-1].y - 1][self.way[-1].x].occupied:
+                counter += 1
+        if self.way[-1].y + 1 > CELL_NUMBER - 1:
+            counter += 1
+        else:
+            if self.grid[self.way[-1].y + 1][self.way[-1].x].occupied:
+                counter += 1
+        if self.way[-1].x - 1 < 0:
+            counter += 1
+        else:
+            if self.grid[self.way[-1].y][self.way[-1].x - 1].occupied:
+                counter += 1
+        if self.way[-1].x + 1 > CELL_NUMBER - 1:
+            counter += 1
+        else:
+            if self.grid[self.way[-1].y][self.way[-1].x + 1].occupied:
+                counter += 1
+
+        if counter == 4:
+            pass
+
     def choose_dir(self):
         new_direction = rand(self.direction[0], self.direction[-1])
         if self.allow_to_spawn_first_pathway:
             try:
-                self.way.append(PathWay(self.start_point.x, self.start_point.y - 1, self.screen))
-                self.grid[self.start_point.y - 1][self.start_point.x].occupied = True
+                self.way.append(PathWay(self.start_point.x, self.start_point.y + 1, self.screen))
+                self.grid[self.start_point.y + 1][self.start_point.x].occupied = True
+                self.grid[self.start_point.y][self.start_point.x].occupied = True
                 self.allow_to_spawn_first_pathway = False
             except AttributeError:
                 pass
         else:
             if new_direction == 0 and self.direction != [1, 2, 3]:
-                if not self.grid[self.way[-1].y - 1][self.way[-1].x].occupied:
-                    self.way.append(PathWay(self.way[-1].x, self.way[-1].y - 1, self.screen))
-                    self.grid[self.way[-1].y][self.way[-1].x].occupied = True
-                    self.direction = [0, 2, 3]
+                if self.way[-1].y - 1 < 0:
+                    self.direction = [2, 3]
                 else:
-                    self.direction = [1, 2, 3]
+                    if not self.grid[self.way[-1].y - 1][self.way[-1].x].occupied:
+                        self.way.append(PathWay(self.way[-1].x, self.way[-1].y - 1, self.screen))
+                        self.grid[self.way[-1].y][self.way[-1].x].occupied = True
+                        self.direction = [0, 2, 3]
+                    else:
+                        self.direction = [1, 2, 3]
             elif new_direction == 1 and self.direction != [0, 2, 3]:
-                if not self.grid[self.way[-1].y + 1][self.way[-1].x].occupied:
-                    self.way.append(PathWay(self.way[-1].x, self.way[-1].y + 1, self.screen))
-                    self.grid[self.way[-1].y][self.way[-1].x].occupied = True
-                    self.direction = [1, 2, 3]
+                if self.way[-1].y == CELL_NUMBER - 1:
+                    self.direction = [2, 3]
                 else:
-                    self.direction = [0, 2, 3]
+                    if not self.grid[self.way[-1].y + 1][self.way[-1].x].occupied:
+                        self.way.append(PathWay(self.way[-1].x, self.way[-1].y + 1, self.screen))
+                        self.grid[self.way[-1].y][self.way[-1].x].occupied = True
+                        self.direction = [1, 2, 3]
+                    else:
+                        self.direction = [0, 2, 3]
             elif new_direction == 2 and self.direction != [0, 1, 3]:
-                if not self.grid[self.way[-1].y][self.way[-1].x - 1].occupied:
-                    self.way.append(PathWay(self.way[-1].x - 1, self.way[-1].y, self.screen))
-                    self.grid[self.way[-1].y][self.way[-1].x].occupied = True
-                    self.direction = [0, 1, 2]
+                if self.way[-1].x - 1 < 0:
+                    self.direction = [0, 1]
                 else:
-                    self.direction = [0, 1, 3]
+                    if not self.grid[self.way[-1].y][self.way[-1].x - 1].occupied:
+                        self.way.append(PathWay(self.way[-1].x - 1, self.way[-1].y, self.screen))
+                        self.grid[self.way[-1].y][self.way[-1].x].occupied = True
+                        self.direction = [0, 1, 2]
+                    else:
+                        self.direction = [0, 1, 3]
             elif new_direction == 3 and self.direction != [0, 1, 2]:
-                if not self.grid[self.way[-1].y][self.way[-1].x + 1].occupied:
-                    self.way.append(PathWay(self.way[-1].x + 1, self.way[-1].y, self.screen))
-                    self.grid[self.way[-1].y][self.way[-1].x].occupied = True
-                    self.direction = [0, 1, 3]
+                if self.way[-1].x + 1 > CELL_NUMBER - 1:
+                    self.direction = [0, 1]
                 else:
-                    self.direction = [0, 1, 2]
+                    if not self.grid[self.way[-1].y][self.way[-1].x + 1].occupied:
+                        self.way.append(PathWay(self.way[-1].x + 1, self.way[-1].y, self.screen))
+                        self.grid[self.way[-1].y][self.way[-1].x].occupied = True
+                        self.direction = [0, 1, 3]
+                    else:
+                        self.direction = [0, 1, 2]
+            self.way_out_of_a_trap()
 
 
 def main():
