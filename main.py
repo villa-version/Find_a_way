@@ -150,7 +150,7 @@ class MainController:
                     counter += 1
                 elif self.grid[self.way[-1].y - 1][self.way[-1].x].wrong:
                     counter += 1
-            if self.way[-1].y + 1 < CELL_NUMBER - 1:
+            if self.way[-1].y + 1 > CELL_NUMBER - 1:
                 counter += 1
             else:
                 if self.grid[self.way[-1].y + 1][self.way[-1].x].occupied:
@@ -164,13 +164,15 @@ class MainController:
                     counter += 1
                 elif self.grid[self.way[-1].y][self.way[-1].x - 1].wrong:
                     counter += 1
-            if self.way[-1].x + 1 < CELL_NUMBER - 1:
+            if self.way[-1].x + 1 > CELL_NUMBER - 1:
                 counter += 1
             else:
                 if self.grid[self.way[-1].y][self.way[-1].x + 1].occupied:
                     counter += 1
                 elif self.grid[self.way[-1].y][self.way[-1].x + 1].wrong:
                     counter += 1
+
+            self.last_dir = self.way[-1].direction
 
             if counter < 4:
                 self.way_out_of_a_trap_state = True
@@ -179,10 +181,8 @@ class MainController:
                 self.grid[self.way[-1].y][self.way[-1].x].wrong = True
                 self.grid[self.way[-1].y][self.way[-1].x].occupied = False
                 self.way.remove(self.way[-1])
-                if self.way[-1].direction != self.last_dir:
+                if self.last_dir in self.direction:
                     self.direction.remove(self.last_dir)
-                else:
-                    self.last_dir = self.way[-1].direction
 
     def choose_dir(self):
         new_direction = rand(self.direction[0], self.direction[-1])
