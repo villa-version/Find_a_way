@@ -75,6 +75,7 @@ class MainController:
     def update(self):
         self.draw_elem()
         self.choose_dir()
+        self.chek_collision_with_finish_point()
 
     def draw_elem(self):
         for row in self.grid:
@@ -85,18 +86,17 @@ class MainController:
 
         try:
             self.start_point.draw()
+            self.finish_point.draw()
         except AttributeError:
             pass
 
-    def spawn_start_point(self, mx, my):
+    def spawn_points(self, mx, my):
         if self.progress == 'SP':
             self.progress = 'FP'
             x = mx//CELL_SIZE
             y = my//CELL_SIZE
             self.start_point = StartPoint(x, y, self.screen)
-
-    def spawn_finish_point(self, mx, my):
-        if self.progress == 'FP':
+        elif self.progress == 'FP':
             self.progress = 'SP'
             x = mx // CELL_SIZE
             y = my // CELL_SIZE
@@ -237,6 +237,17 @@ class MainController:
                         self.direction = [0, 1, 2]
             self.way_out_of_a_trap(new_direction)
 
+    def chek_collision_with_finish_point(self):
+        try:
+            dx = abs(self.finish_point.x - self.way[-1].x)
+            dy = abs(self.finish_point.y - self.way[-1].y)
+            if dx == 1 and dy == 1:
+                print('THE PROGRAM HAS FOUND A WAY TO FINISH POINT, YOU WON')
+                pygame.quit()
+                sys.exit()
+        except AttributeError:
+            pass
+
 
 def main():
     screen = pygame.display.set_mode((CELL_SIZE * CELL_NUMBER, CELL_SIZE * CELL_NUMBER))
@@ -250,8 +261,7 @@ def main():
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                main_controller.spawn_start_point(mouse_x, mouse_y)
-                main_controller.spawn_finish_point(mouse_x, mouse_y)
+                main_controller.spawn_points(mouse_x, mouse_y)
 
         screen.fill((255, 255, 255))
         main_controller.update()
